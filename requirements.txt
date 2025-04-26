@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+pydantic
+duckduckgo-search
+newspaper3k
+httpx
+python-dotenv
