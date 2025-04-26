@@ -5,3 +5,4 @@ duckduckgo-search
 newspaper3k
 httpx
 python-dotenv
+lxml[html_clean]
