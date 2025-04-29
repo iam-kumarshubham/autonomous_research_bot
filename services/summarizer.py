@@ -9,9 +9,8 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 async def summarize_text(text: str) -> str:
     """
     Summarizes a given text using OpenAI's GPT API.
-    If API key is missing, returns a simple fallback summary.
+    If API key is missing or quota is exceeded, returns a fallback summary.
     """
-    # Fallback if no key
     if not OPENAI_API_KEY:
         return "Summary unavailable (no OpenAI API key configured)."
 
@@ -35,12 +34,16 @@ async def summarize_text(text: str) -> str:
         async with httpx.AsyncClient() as client:
             response = await client.post("https://api.openai.com/v1/chat/completions", json=body, headers=headers)
             result = response.json()
-        
+
         if "choices" in result:
             return result["choices"][0]["message"]["content"].strip()
         else:
             raise Exception(f"Failed to summarize: {result}")
 
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 429:  # Quota exceeded
+            return "Summary unavailable (OpenAI quota exceeded)."
+        raise
     except Exception as e:
         print(f"OpenAI summarization failed: {e}")
         return "Summary unavailable (OpenAI error)."
